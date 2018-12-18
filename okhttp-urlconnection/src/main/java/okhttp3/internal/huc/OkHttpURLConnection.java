@@ -96,6 +96,9 @@ public final class OkHttpURLConnection extends HttpURLConnection implements Call
   /** Lazily created (with synthetic headers) on first call to getHeaders(). */
   private Headers responseHeaders;
 
+  /** Lazily created on first call to getTrailers(). */
+  private Headers responseTrailers;
+
   /** Like the superclass field of the same name, but a long and available on all platforms. */
   private long fixedContentLength = -1L;
 
@@ -174,6 +177,14 @@ public final class OkHttpURLConnection extends HttpURLConnection implements Call
           .build();
     }
     return responseHeaders;
+  }
+
+  public Headers getTrailers() throws IOException {
+    if (responseTrailers == null) {
+      Response response = getResponse(true);
+      responseTrailers = response.trailers().newBuilder().build();
+    }
+    return responseTrailers;
   }
 
   private static String responseSourceHeader(Response response) {

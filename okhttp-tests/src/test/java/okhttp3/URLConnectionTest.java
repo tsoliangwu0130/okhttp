@@ -3079,6 +3079,18 @@ public final class URLConnectionTest {
     fail("TODO");
   }
 
+  @Test public void chunkedBodyAndTrailers() throws Exception {
+    MockResponse response = new MockResponse()
+        .setChunkedBody("ABCDE\nFGHIJ", 8)
+        .setTrailers(Headers.of("trailers", "boom"));
+    server.enqueue(response);
+
+    HttpURLConnection connection = urlFactory.open(server.url("/").url());
+    assertContent("ABCDE\nFGHIJ", connection, 12);
+
+    assertEquals(Headers.of("trailers", "boom"), ((OkHttpURLConnection) connection).getTrailers());
+  }
+
   @Test public void emptyRequestHeaderValueIsAllowed() throws Exception {
     server.enqueue(new MockResponse().setBody("body"));
     connection = urlFactory.open(server.url("/").url());
